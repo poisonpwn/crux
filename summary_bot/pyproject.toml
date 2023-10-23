@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "summary-bot"
+version = "0.1.0"
+description = ""
+authors = ["Adithyadev R <45178461+poisonpwn@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+discord = "^2.3.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
