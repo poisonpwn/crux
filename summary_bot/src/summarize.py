@@ -1,31 +1,27 @@
 from transformers import pipeline
 
 
-class Conversation:
-    def __init__(self, messages):
-        self.messages = messages
-
-    @staticmethod
-    def _sanitize(string: str):
-        return string.replace("\n", " ")
-
-    def __str__(self):
-        convo_lines = []
-        for mesg in self.messages:
-            sanitized_content = self._sanitize(str(mesg.content))
-            convo_lines.append(f"{mesg.author.global_name}: {sanitized_content}")
-        return "\n".join(convo_lines)
-
-
 class Summarizer:
     MODEL = "Azma-AI/bart-conversation-summarizer"
 
     def __init__(self):
-        self.pipeline = pipeline("summarizer", model=self.MODEL)
+        self.pipeline = pipeline("summarization", model=self.MODEL)
 
     def summarize(self, text):
-        len_bounds = {
-            "min_length": round(0.2 * len(text)),
-            "max_length": round(0.8 * len(text)),
-        }
-        return self.pipeline(text, **len_bounds)
+        return self.pipeline(text, min_length=25)[0]["summary_text"]
+
+
+if __name__ == "__main__":
+    summarizer = Summarizer()
+
+    summarized_text = summarizer.summarize(
+        """Laurie: So, what are your plans for this weekend?
+Christie: I don’t know. Do you want to get together or something?
+Sarah: How about going to see a movie? Cinemax 26 on Carson Boulevard is showing Enchanted. Laurie: That sounds like a good idea. Maybe we should go out to eat beforehand.
+Sarah: It is fine with me. Where do you want to meet?
+Christie: Let’s meet at Summer Pizza House. I have not gone there for a long time.
+Laurie: Good idea again. I heard they just came up with a new pizza. It should be good because Summer Pizza House always has the best pizza in town.
+Sarah: When should we meet?"""
+    )
+
+    print(summarized_text)

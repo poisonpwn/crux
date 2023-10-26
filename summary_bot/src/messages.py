@@ -16,6 +16,22 @@ class TimeRange:
         return self.start_time <= time <= self.end_time
 
 
+class Conversation:
+    def __init__(self, messages):
+        self.messages = messages
+
+    @staticmethod
+    def _sanitize(string: str):
+        return string.replace("\n", " ")
+
+    def __str__(self):
+        convo_lines = []
+        for mesg in self.messages:
+            sanitized_content = self._sanitize(str(mesg.content))
+            convo_lines.append(f"{mesg.author.global_name}: {sanitized_content}")
+        return "\n".join(convo_lines)
+
+
 class MessagesFetcher:
     SEARCH_LIMIT = 300
     ALLOWED_MESG_TYPES = [MessageType.default, MessageType.reply]
