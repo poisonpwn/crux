@@ -1,10 +1,11 @@
 import discord
+from dotenv import dotenv_values
+
 
 
 def run_discord_bot():
-    TOKEN = "MTE2NTg5NzY5OTE0NTU0Nzg2Ng.GUh0ju.-72WiaxT34_lK5Se9zakSHqQRMVNpLUz490_KY"
-
     WAKE_WORD = "!sum"
+    TOKEN = dotenv_values(".env")["DISCORD_TOKEN"]
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
