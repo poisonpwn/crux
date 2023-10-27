@@ -38,6 +38,14 @@ class MessagesFetcher:
     ALLOWED_MESG_TYPES = [MessageType.default, MessageType.reply]
 
     def __init__(self, channel: TextChannel, exclude_predicate):
+        """controls the operations for the message queue window
+          for a specific channel
+
+        Args:
+            channel (TextChannel): the channel from which the messages are to be fetched
+            exclude_predicate: func which acts on a message to return True if it is to
+              be excluded from the queue
+        """
         self.channel = channel
         self.should_exclude = lambda mesg: any(
             [
@@ -48,6 +56,9 @@ class MessagesFetcher:
         self.messages_queue = None
 
     async def init_message_queue(self):
+        """initialize the queue with SEARCH_LIMIT number of messages
+        from history, excluding the ones which pass the exclude_predicate
+        """
         self.messages_queue = deque()
 
         async for mesg in self.channel.history(limit=self.SEARCH_LIMIT):
@@ -58,6 +69,18 @@ class MessagesFetcher:
             self.messages_queue.appendleft(mesg)
 
     def update_message_queue(self, mesg):
+        """append the new_message to message queue
+        and pop off the oldest one
+
+
+        Args:
+          message(Message): the newest message in the channel
+
+        Raises:
+          MessageQueueNotInitialized,
+            if init_message_queue was not previously ran (it checks if message queue is None)
+
+        """
         if self.messages_queue is None:
             raise MessageQueueNotInitialized(
                 "message queue has to be initialized first"
@@ -116,6 +139,20 @@ class MessagesFetcher:
         return result_list
 
     def get_till_last_message(self, query_user: User) -> deque:
+        """
+        returns the subsequence of the message queue which are to be processed
+        i.e
+        the messages till the users's last message (exclusive),
+        OR
+        if there are replies within that region to messages outside that region,
+        all the messages till the earliest message that was replied to are returned
+        which are to be processed for summarization
+
+        Raises:
+          SearchLimitExceeded:
+            if user's last message was not found in message queue
+            if earliest reply message was created before the time range of the message queue
+        """
         if self.messages_queue is None:
             raise Exception("message queue has to be initialized first")
 
