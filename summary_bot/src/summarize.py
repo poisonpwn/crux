@@ -1,14 +1,22 @@
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 
 
 class Summarizer:
-    MODEL = "Azma-AI/bart-conversation-summarizer"
+    MODEL_REPO = "Azma-AI/bart-conversation-summarizer"
 
     def __init__(self):
-        self.pipeline = pipeline("summarization", model=self.MODEL)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL_REPO)
+        self.pipeline = pipeline(
+            "summarization", self.MODEL_REPO, tokenizer=self.tokenizer
+        )
 
-    def summarize(self, text):
-        return self.pipeline(text, min_length=25)[0]["summary_text"]
+    def summarize(self, text: str):
+        token_len = len(self.tokenizer.tokenize(text))
+        bounds = {
+            "min_length": round(0.2 * token_len),
+            "max_length": round(0.4 * token_len),
+        }
+        return self.pipeline(str(text), **bounds)[0]["summary_text"]
 
 
 if __name__ == "__main__":
