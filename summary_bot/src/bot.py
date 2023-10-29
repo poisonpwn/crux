@@ -64,6 +64,7 @@ def run_discord_bot():
         conversation = Conversation(conversation_messages)
 
         if len(conversation) == 0:
+            await mesg.channel.send("no messages to summarize")
             return
 
         summary = summarizer.summarize(str(conversation))

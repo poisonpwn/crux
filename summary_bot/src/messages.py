@@ -191,6 +191,9 @@ class MessagesFetcher:
                 f"{query_user.global_name}'s last message outside search scope."
             )
 
+        if not result_list:
+            return result_list
+
         if (
             earl_reply_mesg is None
             or earl_reply_mesg.created_at >= result_list[0].created_at
