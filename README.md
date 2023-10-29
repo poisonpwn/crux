@@ -34,18 +34,25 @@ Bonus Tasks:
 	b) caching of messages using a ctx and tolerance parameter provided by user.
 
 ### Features
-1) summary till the users's last message by using `!sum`
-and a range summary using  `!sum <from> <to>`
+1) summary till the users's last message by using
+   ```
+   !sum
+   ```
+   and a range summary using
+   ```
+   !sum <from> <to>
+   ```
+   where \<from> and \<to> are 1 based indexes counted backwards from the the command message.
+   if the region includes replies to messages outside the region, then all messages until the older
+   messages form the messages to be summarized.
 
-	where \<from> and \<to> are 1 based indexes counted backwards from the the command message. if the region includes replies to messages outside the region, then all messages until the older messages form the messages to be summarized.
+   ### Note: the index skips over messages which were excluded for processing (the bot's messages itself, deleted replies, bots own commands etc).
 
-	###Note: the index skips over messages which were excluded for processing (the bot's messages itself, deleted replies, bots own commands etc).
-
-2) the summarization results are sent to the user's dm,
+3) the summarization results are sent to the user's dm,
 	if there are any errors regarding invoking the bot etc.
 	it is sent to the channel.
 
-3) all messages are summarized using the huggingface 
+4) all messages are summarized using the huggingface 
 summarizer pipeline using the model at Azma-AI/bart-conversation-summarizer
 ran using pytorch build with cuda enabled.
 	
