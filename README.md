@@ -54,9 +54,7 @@ Bonus Tasks:
 
 4) all messages are summarized using the huggingface 
 summarizer pipeline using the model at
-```
 Azma-AI/bart-conversation-summarizer
-```
 ran using pytorch build with cuda enabled.
 	
 
