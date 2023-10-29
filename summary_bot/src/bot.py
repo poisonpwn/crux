@@ -21,7 +21,7 @@ def run_discord_bot():
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
-    message_fetchers = {}
+    message_fetchers: dict[str, MessagesFetcher] = {}
     summarizer = Summarizer()
     print("Summarizer initialized")
 
@@ -33,20 +33,41 @@ def run_discord_bot():
         print(f"{client.user} is now ready!")
 
     @client.event
-    async def on_message(mesg):
-        if channel_id := mesg.channel.id not in message_fetchers:
-            message_fetchers[channel_id] = await get_message_fetcher(
-                mesg.channel, exclude_predicate
-            )
+    async def on_message_edit(before, after):
+        if channel_id := before.channel.id not in message_fetchers:
+            return
 
         message_fetcher = message_fetchers[channel_id]
+        for index, mesg in enumerate(message_fetcher.messages_queue):
+            if mesg.id == before.id:
+                message_fetcher.messages_queue[index] = after
+                break
 
+    @client.event
+    async def on_message_delete(deleted_message):
+        if channel_id := deleted_message.id not in message_fetchers:
+            return
+
+        message_fetcher = message_fetchers[channel_id]
+        for index, message in enumerate(message_fetcher.messages_queue):
+            if message.id == deleted_message.id:
+                del message_fetcher.messages_queue[index]
+
+    @client.event
+    async def on_message(mesg):
         if mesg.author == client.user:
             return
 
         first_word, *fetch_bounds = str(mesg.content).split(" ")
         if first_word != WAKE_WORD:
             return
+
+        if channel_id := mesg.channel.id not in message_fetchers:
+            message_fetchers[channel_id] = await get_message_fetcher(
+                mesg.channel, exclude_predicate
+            )
+
+        message_fetcher = message_fetchers[channel_id]
 
         try:
             if fetch_bounds:
