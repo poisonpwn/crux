@@ -9,13 +9,13 @@ what kind of exam schedule they desire.
 it is mentioned this should be done in a seperate fork of the main repository.
 repo link: https://github.com/poisonpwn/chronoscript
 
-###Features
+### Features
 1) choice of courses, choice of lite order, exam schedule fit etc are now prompted to the user from the command line
 2) users is now prompted to exclude certain courses of their choice
 3) User can choose if they want their exam schedule Spread out or Close Together.
 4) the user is asked if  they prefer not to have two exams on same day.
 
-###Note: 
+### Note: 
 * the last two only apply if the user has chosen electives.
 
 ## TL;DR Discord Bot
@@ -33,7 +33,7 @@ Bonus Tasks:
 	a) include media files if possible.
 	b) caching of messages using a ctx and tolerance parameter provided by user.
 
-###Features
+### Features
 1) summary till the users's last message by using `!sum`
 and a range summary using  `!sum <from> <to>`
 
