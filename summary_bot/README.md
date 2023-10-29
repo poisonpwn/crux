@@ -28,6 +28,10 @@ with the  addtional libraries:
 CuDDN (v8.9.5): https://developer.nvidia.com/rdp/cudnn-download
 NCCL (2.19.3): https://developer.nvidia.com/nccl/nccl-download
 
+place the bot token in the .env file in the same folder as pyproject.toml
+```
+DISCORD_TOKEN=<value>
+```
 run the bot with (python version 3.11.5)
 ```
 poetry run python src/main.py
