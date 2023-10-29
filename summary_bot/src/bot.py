@@ -62,7 +62,8 @@ def run_discord_bot():
             return
 
         conversation = Conversation(conversation_messages)
-        if not conversation:
+
+        if len(conversation) == 0:
             return
 
         summary = summarizer.summarize(str(conversation))
