@@ -1,5 +1,4 @@
 from collections import deque
-import datetime as dt
 from discord import DeletedReferencedMessage, User
 from discord.channel import TextChannel
 from discord.enums import MessageType
@@ -31,6 +30,9 @@ class Conversation:
             message_content = str(mesg.content)
             convo_lines.append(f"{mesg.author.global_name}: {message_content}")
         return "\n".join(convo_lines)
+
+    def __len__(self):
+        return len(self.messages)
 
 
 class MessagesFetcher:
@@ -151,7 +153,8 @@ class MessagesFetcher:
         Raises:
           SearchLimitExceeded:
             if user's last message was not found in message queue
-            if earliest reply message was created before the time range of the message queue
+            if earliest reply message was created before the time range of the
+            message queue
         """
         if self.messages_queue is None:
             raise Exception("message queue has to be initialized first")
@@ -159,18 +162,19 @@ class MessagesFetcher:
         messages_queue = self.messages_queue.copy()
         result_list = deque()
         time_range = self.__messages_time_range(messages_queue)
-        earl_reply_time = dt.datetime.now(dt.timezone.utc)  # max value for now
-        earl_reply_id = None
+        earl_reply_mesg = messages_queue[-1]
 
         for back_index, mesg in enumerate(reversed(messages_queue), start=1):
+            index = len(messages_queue) - back_index
             if mesg.author == query_user:
-                author_last_mesg_ind = len(messages_queue) - back_index
+                author_last_mesg_index = index
                 break
 
             if mesg.reference is not None:
+                # skip adding messages which are replies to deleted messages
                 if isinstance(
                     ref_mesg := mesg.reference.resolved, DeletedReferencedMessage
-                ):
+                ) or self.should_exclude(ref_mesg):
                     continue
 
                 if ref_mesg.created_at not in time_range:
@@ -178,9 +182,8 @@ class MessagesFetcher:
                         "region contains references to messages are outside search scope"
                     )
 
-                if ref_mesg.created_at < earl_reply_time:
-                    earl_reply_time = ref_mesg.created_at
-                    earl_reply_id = ref_mesg.id
+                if ref_mesg.created_at < earl_reply_mesg.created_at:
+                    earl_reply_mesg = ref_mesg
 
             result_list.appendleft(mesg)
         else:
@@ -188,13 +191,19 @@ class MessagesFetcher:
                 f"{query_user.global_name}'s last message outside search scope."
             )
 
-        if earl_reply_id is None:
+        if (
+            earl_reply_mesg is None
+            or earl_reply_mesg.created_at >= result_list[0].created_at
+        ):
             return result_list
 
-        for index in reversed(range(author_last_mesg_ind + 1)):
-            mesg = messages_queue[index]
+        # add all the messages from the author's last message to the earlies
+        # replied message (inclusive)
+        for i in range(author_last_mesg_index):
+            backwards_from_author_last_messaage = author_last_mesg_index - i
+            mesg = messages_queue[backwards_from_author_last_messaage]
             result_list.appendleft(mesg)
-            if mesg.id == earl_reply_id:
+            if mesg.id == earl_reply_mesg.id:
                 break
 
         return result_list
